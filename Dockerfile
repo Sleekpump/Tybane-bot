@@ -2,18 +2,16 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 
-# Install numpy and pandas with correct versions for Python 3.9
 RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir --only-binary :all: numpy==1.23.5 pandas==1.5.3
 
-# Install the rest
+# Install numpy and pandas first
+RUN pip install --no-cache-dir numpy==1.23.5 pandas==1.5.3
+
+# Install everything else (allow source builds if needed)
 COPY requirements.txt .
-RUN pip install --no-cache-dir --only-binary :all: -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
