@@ -488,10 +488,12 @@ def analyze(symbol):
 
 # ─── PARALLEL SCANNING ─────────────────────────────────────────────────────────
 async def analyze_async(symbol):
-    loop = asyncio.get_event_loop()
     try:
-        result = await loop.run_in_executor(None, analyze, symbol)
-        log.info(result["label"] + ": " + result["direction"] + " | 4H:" + str(result["score_4h"]) + " 1D:" + str(result["score_1d"]) + " Combined:" + str(result["score"]))
+        result = await run_full_pipeline(
+            symbol, fetch_ohlcv, COIN_LABELS,
+            ai_client, exchange, news_context
+        )
+        log.info(result["label"] + ": " + result["direction"] + " | Q:" + str(result.get("abs_score", 0)))
         return result
     except Exception as e:
         log.error("Error " + symbol + ": " + str(e))
@@ -1732,10 +1734,9 @@ async def auto_weekly_report(app):
     log.info("Weekly report loop started")
     while True:
         now = datetime.utcnow()
-        import datetime as dt
         days_until_sunday = (6 - now.weekday()) % 7 or 7
         target = now.replace(hour=19, minute=0, second=0, microsecond=0)
-        target = target + dt.timedelta(days=days_until_sunday)
+        target = target + timedelta(days=days_until_sunday)
         wait_seconds = (target - now).total_seconds()
         await asyncio.sleep(wait_seconds)
         try:
@@ -1780,7 +1781,9 @@ def main():
     app.add_handler(CommandHandler("blacklist",  cmd_blacklist))
     app.add_handler(CommandHandler("whale",      cmd_whale))
     app.add_handler(CommandHandler("alert",      cmd_alert))
-
+    app.add_handler(CommandHandler("backtest", lambda u, c: cmd_backtest(u, c, exchange, COIN_LABELS)))
+    app.add_handler(CommandHandler("risk",     lambda u, c: cmd_risk(u, c, active_signals, load_json(HISTORY_FILE, []))))
+    
     async def post_init(application):
         asyncio.create_task(auto_scan(application))
         asyncio.create_task(auto_news(application))
