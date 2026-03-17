@@ -1,19 +1,17 @@
-FROM python:3.13-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install minimal build dependencies (just in case)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Force pip to use pre-built wheels only
+# Install numpy and pandas with correct versions for Python 3.9
 RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir --only-binary :all: numpy==1.23.5 pandas==1.5.3
 
-# Install numpy and pandas first with --only-binary flag
-RUN pip install --no-cache-dir --only-binary :all: numpy==1.26.4 pandas==2.2.3
-
-# Install the rest of requirements
+# Install the rest
 COPY requirements.txt .
 RUN pip install --no-cache-dir --only-binary :all: -r requirements.txt
 
