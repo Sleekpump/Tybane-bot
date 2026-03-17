@@ -13,6 +13,10 @@ from groq import Groq
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from dotenv import load_dotenv
+from signal_engine import analyze_v2
+from ai_validator  import run_full_pipeline, format_ai_block
+from risk_manager  import risk_gate, format_risk_block, cmd_risk, get_portfolio_heat
+from backtester    import cmd_backtest
 
 load_dotenv()
 logging.basicConfig(
