@@ -5,5 +5,5 @@ numpy==1.23.5
 scikit-learn==1.2.2
 joblib==1.2.0
 python-dotenv==1.0.0
-feedparser==6.0.11  # ← Changed from 6.0.10 to 6.0.11
+feedparser==6.0.11
 groq==0.4.2
