@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir --upgrade pip
 # Install numpy and pandas first
 RUN pip install --no-cache-dir numpy==1.23.5 pandas==1.5.3
 
-# Install everything else (allow source builds if needed)
+# Install everything else
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
