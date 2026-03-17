@@ -855,7 +855,7 @@ def format_scan_summary(results):
                 type_tag = " \u26a0"
             else:
                 type_tag = ""
-            msg += e + " *" + r["label"] + "* \u2014 " + r["direction"] + conf + type_tag + " | `" + ("{:+d}".format(r["score"])) + "` | `$" + ("{:.4f}".format(r["price"])) + "`\n"
+            msg += e + " *" + r["label"] + "* \u2014 " + r["direction"] + conf + type_tag + " | `" + ("{:+.0f}".format(r["score"])) + "` | `$" + ("{:.4f}".format(r["price"])) + "`\n"
         messages.append(msg)
     return messages
 
