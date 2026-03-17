@@ -1,5 +1,4 @@
-
-FROM python:3.11-slim
+FROM python:3.9-slim  # Use 3.9 instead of 3.11 for better pandas compatibility
 
 WORKDIR /app
 
@@ -12,6 +11,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir pandas==1.3.5 numpy==1.21.6 && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY . .
