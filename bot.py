@@ -768,7 +768,7 @@ def format_signal(r, sl, tp1, tp2, ob_bias, ob_ratio, pos_usdt, contracts):
     emoji      = "\U0001f7e2" if r["direction"] == "LONG" else "\U0001f534"
     conf_emoji = "\U0001f525" if r["confidence"] == "HIGH" else "\u26a1"
     tf_emoji   = "\u2705" if r["tf_agree"] else "\u26a0"
-    dir_text   = "Buy/Long" if r["direction"] == "LONG" else "Sell/Short"
+    dir_text   = "Buy/Long" if r["direction"] == "LONG" else "Sell/Short" if r["direction"] == "SHORT" else "No Trade"
     sl_pct     = abs(r["price"] - sl) / r["price"] * 100
     tp1_pct    = abs(tp1 - r["price"]) / r["price"] * 100
     tp2_pct    = abs(tp2 - r["price"]) / r["price"] * 100
