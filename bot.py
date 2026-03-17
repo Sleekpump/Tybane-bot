@@ -960,7 +960,7 @@ async def cmd_scalp(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     """Scalp scan using 15m+1H — single best signal, paper trade auto-closes in 24hrs."""
     await update.message.reply_text("\u26a1 Scalp scan (15m+1H)... finding best setup...")
     try:
-    scalp_results = await scalp_scan_coins()
+        scalp_results = await scalp_scan_coins()
         actionable = [r for r in scalp_results if r["direction"] != "NEUTRAL" and r["confidence"] in ("HIGH","MEDIUM")]
         if not actionable:
             await update.message.reply_text("\u26a1 No strong scalp signals right now. Try again in 15 minutes or use /swing.")
