@@ -1529,6 +1529,7 @@ async def auto_scan(app):
                 }
 
                 msg = format_signal(r, sl, tp1, tp2, ob_bias, ob_ratio, pos_usdt, contracts)
+                msg += format_ai_block(r.get("ai_result", {}))
                 await send_msg(app, msg)
                 log.info("Signal sent: " + r["label"] + " " + r["direction"] + " | Score: " + str(r["score"]))
         except Exception as e:
