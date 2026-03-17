@@ -5,7 +5,7 @@ Timeframes: 4H + 1D | 40 coins dynamic | Score-based signals
 
 import os, json, logging, asyncio, feedparser
 import time as _time
-from datetime import datetime
+from datetime import datetime, timedelta
 import ccxt
 import pandas as pd
 import pandas_ta as ta
