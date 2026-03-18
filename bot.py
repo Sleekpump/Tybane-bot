@@ -1135,7 +1135,7 @@ async def cmd_start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         "\U0001f916 *Phyrobot Signal Bot*\n\n"
         "Watching: top 40 coins by volume\n"
         "Timeframes: 1H + 4H\n"
-        "Signals fire when score \u22655 (MEDIUM/HIGH)\n\n"
+        "Signals fire when quality \u226545 (MEDIUM/HIGH)\n\n"
         "*Scanning:*\n"
         "/scan \u2014 Full market scan (1H+4H)\n"
         "/best \u2014 Best signal right now\n"
@@ -1410,7 +1410,7 @@ async def cmd_status(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         "Coins: top " + str(TOP_COINS) + " by volume\n"
         "Timeframes: 1H + 4H\n"
         "Scan interval: every " + str(SCAN_INTERVAL//60) + " min\n"
-        "Signal threshold: score \u22655 (MEDIUM/HIGH)\n"
+        "Signal threshold: quality \u226545 (MEDIUM/HIGH)\n"
         "Account size: $" + str(ACCOUNT_SIZE) + "\n"
         "Risk per trade: " + str(RISK_PCT) + "%\n"
         "Paper mode: " + ("ON" if paper_mode else "OFF"),
