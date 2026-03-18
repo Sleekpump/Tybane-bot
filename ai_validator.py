@@ -444,7 +444,7 @@ async def run_full_pipeline(
 
     ai_result = await validate_signal_async(
         groq_client, symbol,
-        r.get("quality", {}),
+        r.get("quality") or r,
         r["price"], r["funding"],
         news_sentiment, news_points,
     )
