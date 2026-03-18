@@ -177,15 +177,15 @@ def validate_signal_with_ai(
         "rationale": "AI validation bypassed",
         "key_risk": "Unknown",
         "suggested_action": "Follow scoring engine signal",
-        "final_confidence": quality_result.get("confidence", "MEDIUM"),
-        "final_quality": quality_result.get("quality_score", 0),
+        "final_confidence": quality_result.get("confidence") or "MEDIUM",
+        "final_quality": quality_result.get("quality_score") or quality_result.get("abs_score", 0),
         "ai_used": False,
     }
 
     if not AI_VALIDATION_ENABLED or groq_client is None:
         return default
 
-    quality = quality_result.get("quality_score", 0)
+    quality = quality_result.get("quality_score") or quality_result.get("abs_score", 0)
     if quality < AI_MIN_QUALITY_TO_CALL:
         default["rationale"] = f"Quality too low for AI review ({quality}/100)"
         return default
