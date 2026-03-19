@@ -1502,10 +1502,26 @@ async def auto_scan(app):
                     log.info("Blacklisted — skipping: " + r["label"])
                     continue
                 last_signal[key] = {"score": r["score"], "time": now}
-                sl, tp1, tp2 = calc_levels(r["direction"], r["price"], r["atr"])
+                history = load_json(HISTORY_FILE, [])
+                risk = risk_gate(
+                    symbol=r["symbol"],
+                    direction=r["direction"],
+                    price=r["price"],
+                    atr=r["atr"],
+                    quality_score=r.get("abs_score", 0),
+                    active_signals=active_signals,
+                    trade_history=history,
+                )
+                if not risk["approved"]:
+                    log.info("Risk gate blocked " + r["label"] + ": " + risk["reject_reason"])
+                    continue
+                sl        = risk["sl"]
+                tp1       = risk["tp1"]
+                tp2       = risk["tp2"]
+                pos_usdt  = risk["position_usdt"]
+                contracts = risk["contracts"]
                 ob_bias, ob_ratio = get_order_book_bias(r["symbol"])
-                pos_usdt, contracts = calc_position_size(r["price"], sl)
-
+               
                 # Record signal
                 record_signal(r["symbol"], r["direction"], r["price"], sl, tp1, tp2, r["confidence"])
 
