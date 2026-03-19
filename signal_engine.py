@@ -725,8 +725,8 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
     score_4h, signals_4h, support, resistance, rsi_4h, atr_4h, price = score_timeframe_v2(df_1h, regime)
     score_1d, signals_1d, _,       _,          rsi_1d, atr_1d, _     = score_timeframe_v2(df_4h, regime)
 
-    direction  = quality_result["direction"]
-    confidence = quality_result["confidence"]
+    direction  = quality_result.get("direction", "NEUTRAL")
+    confidence = quality_result.get("confidence", "LOW")
     label      = coin_labels.get(symbol, symbol.split("/")[0])
 
     return {
@@ -734,8 +734,8 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
         "label":     label,
         "direction": direction,
         "confidence": confidence,
-        "score":     quality_result["quality_score"],
-        "abs_score": quality_result["quality_score"],
+        "score":     quality_result.get("quality_score", 0),
+        "abs_score": quality_result.get("quality_score", 0),
         "score_4h":  score_4h,
         "score_1d":  score_1d,
         "tf_agree":  quality_result["filters"].get("tf_alignment", {}).get("pass", False),
