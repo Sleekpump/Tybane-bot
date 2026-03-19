@@ -33,10 +33,10 @@ log = logging.getLogger(__name__)
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
 AI_VALIDATION_ENABLED  = True    # toggle off to bypass AI (falls back to Phase 1)
 AI_TIMEOUT_SECONDS     = 8       # max wait for Groq response
-AI_MIN_QUALITY_TO_CALL = 40      # don't call AI for low-quality signals (saves API calls)
+AI_MIN_QUALITY_TO_CALL = 55      # don't call AI for low-quality signals (saves API calls)
 AI_VETO_THRESHOLD      = 30      # AI confidence below this = REJECT
 AI_BOOST_THRESHOLD     = 70      # AI confidence above this = confidence upgrade possible
-AI_CACHE_TTL           = 300     # cache same signal context for 5 minutes (avoid spam)
+AI_CACHE_TTL           = 900     # cache same signal context for 5 minutes (avoid spam)
 
 # ─── SIGNAL CACHE (prevents duplicate AI calls for same signal) ────────────────
 _ai_cache: dict = {}
