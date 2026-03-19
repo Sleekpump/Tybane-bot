@@ -1216,7 +1216,7 @@ async def cmd_news(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         msg += "\n*Recent Headlines:*\n"
         for h in headlines[:5]:
             msg += "\u2022 " + h + "\n"
-        await update.message.reply_text(msg, parse_mode="Markdown")
+        await update.message.reply_text(msg, parse_mode=None)
     except Exception as e:
         await update.message.reply_text("Error: " + str(e))
 
