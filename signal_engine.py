@@ -30,7 +30,7 @@ WEIGHTS = {
 }
 
 # Minimum groups that must agree for a signal to fire (confluence gate)
-CONFLUENCE_MIN = 3
+CONFLUENCE_MIN = 4
 
 # Minimum quality score to emit a signal
 QUALITY_THRESHOLD_HIGH   = 65
