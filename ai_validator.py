@@ -442,9 +442,14 @@ async def run_full_pipeline(
     news_sentiment = (news_context or {}).get("sentiment", "NEUTRAL")
     news_points    = (news_context or {}).get("key_points", [])
 
+    quality_data = r.get("quality") or {}
+    quality_data["quality_score"] = r.get("abs_score", 0)
+    quality_data["direction"] = r.get("direction", "NEUTRAL")
+    quality_data["confidence"] = r.get("confidence", "LOW")
+
     ai_result = await validate_signal_async(
         groq_client, symbol,
-        r.get("quality") or r,
+        quality_data,
         r["price"], r["funding"],
         news_sentiment, news_points,
     )
