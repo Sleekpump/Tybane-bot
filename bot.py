@@ -971,13 +971,13 @@ async def cmd_scalp(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         pos_usdt, contracts = calc_position_size(best["price"], sl)
 
         # Open paper trade as scalp type and register in active_signals for monitoring
+        record_signal(best["symbol"], best["direction"], best["price"], sl, tp1, tp2, best["confidence"], trade_type="scalp")
         if paper_mode:
             existing = load_json(PAPER_FILE, [])
             already_open = any(t["symbol"] == best["symbol"] and t["status"] == "OPEN" and t.get("trade_type") == "scalp" for t in existing)
             if not already_open:
                 open_paper_trade(best["symbol"], best["direction"], best["price"], sl, tp1, tp2, best["confidence"], trade_type="scalp", signal_type=best.get("signal_type", "REVERSAL"))
-                record_signal(best["symbol"], best["direction"], best["price"], sl, tp1, tp2, best["confidence"], trade_type="scalp")
-
+                
         # Always register in active_signals so monitor tracks TP1, trailing stop, re-entry
         active_signals[best["symbol"]] = {
             "direction": best["direction"], "entry": best["price"],
