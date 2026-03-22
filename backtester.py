@@ -657,15 +657,15 @@ async def cmd_backtest(update, ctx, exchange_ref, coin_labels: dict):
             tune = True
 
     # Use top 10 coins for speed (full 40 would take ~20 mins)
-try:
-    import json
-    with open("paper_trades.json") as f:
-        trades = json.load(f)
-    recent_symbols = list(dict.fromkeys([t["symbol"] for t in trades[-20:]]))[:10]
-    symbols = recent_symbols if recent_symbols else list(coin_labels.keys())[:10]
-    log.info("Backtest using paper trade coins: " + str([s.split("/")[0] for s in symbols]))
-except Exception:
-    symbols = list(coin_labels.keys())[:10]
+    try:
+            import json
+            with open("paper_trades.json") as f:
+                trades = json.load(f)
+            recent_symbols = list(dict.fromkeys([t["symbol"] for t in trades[-20:]]))[:10]
+            symbols = recent_symbols if recent_symbols else list(coin_labels.keys())[:10]
+            log.info("Backtest using paper trade coins: " + str([s.split("/")[0] for s in symbols]))
+        except Exception:
+            symbols = list(coin_labels.keys())[:10]
 
     await update.message.reply_text(
         f"🔬 *Starting backtest...*\n\n"
