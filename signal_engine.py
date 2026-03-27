@@ -597,8 +597,8 @@ def compute_signal_quality(
     result["direction"] = direction
 
     if direction == "NEUTRAL":
-        result["reject_reason"] = f"Weighted score neutral ({normalized:.2f})"
-        return result
+       result["reject_reason"] = f"SHORT blocked — funding rate {funding_rate:.4f} not positive"
+       return result
       
     # ── Regime gate ───────────────────────────────────────────
     regime_name = regime.get("regime", "RANGING")
