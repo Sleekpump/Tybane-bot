@@ -34,7 +34,7 @@ CONFLUENCE_MIN = 4
 
 # Minimum quality score to emit a signal
 QUALITY_THRESHOLD_HIGH   = 65
-QUALITY_THRESHOLD_MEDIUM = 45
+QUALITY_THRESHOLD_MEDIUM = 55
 
 # ATR multiplier thresholds
 VOLATILITY_MAX_ATR_PCT = 8.0   # skip coin if ATR% > 8% (too erratic)
@@ -512,9 +512,11 @@ def trend_alignment_filter(score_htf: float, score_ltf: float) -> dict:
 
 # ─── MAIN SCORING ENGINE ─────────────────────────────────────────────────────
 def compute_signal_quality(
-    df_ltf: pd.DataFrame,   # lower timeframe (e.g. 1H)
-    df_htf: pd.DataFrame,   # higher timeframe (e.g. 4H)
+    df_ltf: pd.DataFrame,
+    df_htf: pd.DataFrame,
     symbol: str = "",
+    funding_rate: float = 0.0,
+    rsi_val: float = 50.0,
 ) -> dict:
     """
     Full Phase 1 signal quality computation.
@@ -597,7 +599,40 @@ def compute_signal_quality(
     if direction == "NEUTRAL":
         result["reject_reason"] = f"Weighted score neutral ({normalized:.2f})"
         return result
+      
+    # ── Regime gate ───────────────────────────────────────────
+    regime_name = regime.get("regime", "RANGING")
 
+    if direction == "LONG" and regime_name == "TRENDING_DOWN":
+        result["reject_reason"] = "LONG blocked — market is TRENDING_DOWN"
+        result["direction"] = "NEUTRAL"
+        return result
+
+    if direction == "SHORT" and regime_name == "TRENDING_UP":
+        result["reject_reason"] = "SHORT blocked — market is TRENDING_UP"
+        result["direction"] = "NEUTRAL"
+        return result
+
+    if direction == "SHORT" and regime_name == "TRENDING_DOWN":
+        if rsi_val < 70:
+            result["reject_reason"] = f"SHORT blocked — RSI {rsi_val:.1f} not overbought (need > 70)"
+            result["direction"] = "NEUTRAL"
+            return result
+        if funding_rate <= 0:
+            result["reject_reason"] f"SHORT blocked — funding rate {funding_rate:.4f} not positive"
+            result["direction"] = "NEUTRAL"
+            return result
+
+    if direction == "LONG" and regime_name == "RANGING":
+        result["reject_reason"] = "Swing LONG blocked in RANGING market — use scalp instead"
+        result["direction"] = "NEUTRAL"
+        return result
+
+    if direction == "SHORT" and regime_name == "RANGING":
+        result["reject_reason"] = "Swing SHORT blocked in RANGING market — use scalp instead"
+        result["direction"] = "NEUTRAL"
+        return result
+  
     # ── 5. Confluence gate ────────────────────────────────────────────────
     threshold = 0.15  # a group must score above this to "agree"
     agreeing_groups = sum(
@@ -718,7 +753,11 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
     df_4h = fetch_ohlcv_fn(symbol, "4h", 100)
 
     # Run the full quality engine
-    quality_result = compute_signal_quality(df_1h, df_4h, symbol)
+    # Get RSI for regime gate
+    rsi_series = ta.rsi(df_1h["close"], length=14)
+    rsi_current = float(rsi_series.dropna().iloc[-1]) if rsi_series is not None and len(rsi_series.dropna()) > 0 else 50.0
+
+    quality_result = compute_signal_quality(df_1h, df_4h, symbol, funding_rate=0.0, rsi_val=rsi_current)
 
     # Also compute legacy scores for display compatibility
     regime = quality_result.get("regime") or detect_regime(df_4h)
