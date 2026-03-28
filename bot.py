@@ -765,7 +765,6 @@ def get_paper_summary():
 
 # ─── SIGNAL FORMATTING ─────────────────────────────────────────────────────────
 def format_signal(r, sl, tp1, tp2, ob_bias, ob_ratio, pos_usdt, contracts):
-    log.info("DEBUG regime value: " + str(r.get("regime")))
     emoji      = "\U0001f7e2" if r["direction"] == "LONG" else "\U0001f534"
     conf_emoji = "\U0001f525" if r["confidence"] == "HIGH" else "\u26a1"
     tf_emoji   = "\u2705" if r["tf_agree"] else "\u26a0"
