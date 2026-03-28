@@ -1,4 +1,4 @@
-7"""
+"""
 Phyrobot — Multi-Coin Signal Bot
 Timeframes: 4H + 1D | 40 coins dynamic | Score-based signals
 """
