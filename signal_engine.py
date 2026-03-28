@@ -34,7 +34,7 @@ CONFLUENCE_MIN = 4
 
 # Minimum quality score to emit a signal
 QUALITY_THRESHOLD_HIGH   = 65
-QUALITY_THRESHOLD_MEDIUM = 55
+QUALITY_THRESHOLD_MEDIUM = 50
 
 # ATR multiplier thresholds
 VOLATILITY_MAX_ATR_PCT = 8.0   # skip coin if ATR% > 8% (too erratic)
