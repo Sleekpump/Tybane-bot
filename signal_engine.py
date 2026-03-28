@@ -768,7 +768,14 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
     direction  = quality_result.get("direction", "NEUTRAL")
     confidence = quality_result.get("confidence", "LOW")
     label      = coin_labels.get(symbol, symbol.split("/")[0])
-
+    
+    log.info("DEBUG final regime in analyze_v2: " + str(regime) + " type: " + str(type(regime)))
+    return {
+        "symbol":    symbol,
+        ...
+        "regime":    regime,
+        ...
+    }
     return {
         "symbol":    symbol,
         "label":     label,
