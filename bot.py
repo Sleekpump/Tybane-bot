@@ -1,4 +1,4 @@
-"""
+7"""
 Phyrobot — Multi-Coin Signal Bot
 Timeframes: 4H + 1D | 40 coins dynamic | Score-based signals
 """
@@ -791,8 +791,9 @@ def format_signal(r, sl, tp1, tp2, ob_bias, ob_ratio, pos_usdt, contracts):
         type_emoji = "\u26a0"
         type_label = "WEAK"
 
-    regime_name = r.get("regime", {}).get("regime", "UNKNOWN") if isinstance(r.get("regime"), dict) else "UNKNOWN"
-    adx_val = r.get("regime", {}).get("adx", 0) if isinstance(r.get("regime"), dict) else 0
+    regime_data = r.get("regime") or {}
+    regime_name = regime_data.get("regime", "UNKNOWN") if isinstance(regime_data, dict) else str(regime_data)
+    adx_val = regime_data.get("adx", 0) if isinstance(regime_data, dict) else 0
     
     msg  = emoji + " *" + r["label"] + " Signal | " + datetime.now().strftime("%H:%M UTC") + "*\n"
     msg += conf_emoji + " *" + r["direction"] + "* | " + r["confidence"] + " | Score: `" + str(r["score"]) + "`\n"
