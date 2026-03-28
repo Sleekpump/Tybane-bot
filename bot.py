@@ -888,7 +888,8 @@ async def cmd_coin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             COIN_LABELS[symbol] = coin
 
         r = await run_full_pipeline(symbol, fetch_ohlcv, COIN_LABELS, ai_client, exchange, news_context)
-
+        log.info("DEBUG full r keys: " + str(list(r.keys()) if r else "None"))
+        
         if not original_label and symbol in COIN_LABELS:
             del COIN_LABELS[symbol]
 
