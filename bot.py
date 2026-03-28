@@ -791,8 +791,12 @@ def format_signal(r, sl, tp1, tp2, ob_bias, ob_ratio, pos_usdt, contracts):
         type_emoji = "\u26a0"
         type_label = "WEAK"
 
+    regime_name = r.get("regime", {}).get("regime", "UNKNOWN") if isinstance(r.get("regime"), dict) else "UNKNOWN"
+    adx_val = r.get("regime", {}).get("adx", 0) if isinstance(r.get("regime"), dict) else 0
+    
     msg  = emoji + " *" + r["label"] + " Signal | " + datetime.now().strftime("%H:%M UTC") + "*\n"
     msg += conf_emoji + " *" + r["direction"] + "* | " + r["confidence"] + " | Score: `" + str(r["score"]) + "`\n"
+    msg += "📊 Regime: `" + regime_name + "` | ADX: `" + str(adx_val) + "`\n"
     msg += type_emoji + " Type: *" + type_label + "* | " + type_reason + "\n"
     tf_label = r.get("tf_labels", ("1H", "4H"))
     msg += tf_emoji + " " + tf_label[0] + ": `" + str(r["score_4h"]) + "` | " + tf_label[1] + ": `" + str(r["score_1d"]) + "` | Funding: `" + "{:.3f}".format(r["funding"]*100) + "%`\n\n"
