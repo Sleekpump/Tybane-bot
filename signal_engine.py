@@ -772,10 +772,6 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
     log.info("DEBUG final regime in analyze_v2: " + str(regime) + " type: " + str(type(regime)))
     return {
         "symbol":    symbol,
-        "regime":    regime,
-    }
-    return {
-        "symbol":    symbol,
         "label":     label,
         "direction": direction,
         "confidence": confidence,
