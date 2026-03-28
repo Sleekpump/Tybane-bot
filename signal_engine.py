@@ -778,8 +778,8 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
         "abs_score": quality_result.get("quality_score", 0),
         "score_4h":  score_4h,
         "score_1d":  score_1d,
-        "tf_agree":  quality_result["filters"].get("tf_alignment", {}).get("pass", False),
-        "signals":   quality_result["signals"][:10],
+        "tf_agree":  quality_result.get("filters", {}).get("tf_alignment", {}).get("pass", False),
+        "signals":   quality_result.get("signals", [])[:10],
         "price":     price,
         "support":   support,
         "resistance": resistance,
@@ -795,5 +795,5 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
         "signal_type": "REVERSAL",
         "type_conf":   confidence,
         "type_reason": quality_result.get("reject_reason", "") or
-                       f"{quality_result['confluence_groups']} groups confluent | Q:{quality_result['quality_score']}",
+                       f"{quality_result.get('confluence_groups', 0)} groups confluent | Q:{quality_result.get('quality_score', 0)}",
     }
