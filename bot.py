@@ -887,7 +887,8 @@ async def cmd_coin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         if not original_label:
             COIN_LABELS[symbol] = coin
 
-        r = analyze(symbol)
+        r = await run_full_pipeline(symbol, fetch_ohlcv, COIN_LABELS, ai_client, exchange, news_context)
+        log.info("DEBUG cmd_coin regime: " + str(r.get("regime")))
 
         # Clean up if we added it temporarily
         if not original_label:
