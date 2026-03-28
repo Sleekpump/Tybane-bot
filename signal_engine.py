@@ -761,6 +761,7 @@ def analyze_v2(symbol: str, fetch_ohlcv_fn, coin_labels: dict) -> dict:
 
     # Also compute legacy scores for display compatibility
     regime = quality_result.get("regime") or detect_regime(df_4h)
+    log.info("DEBUG analyze_v2 regime: " + str(regime))
     score_4h, signals_4h, support, resistance, rsi_4h, atr_4h, price = score_timeframe_v2(df_1h, regime)
     score_1d, signals_1d, _,       _,          rsi_1d, atr_1d, _     = score_timeframe_v2(df_4h, regime)
 
