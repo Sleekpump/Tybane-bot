@@ -888,12 +888,16 @@ async def cmd_coin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             COIN_LABELS[symbol] = coin
 
         r = await run_full_pipeline(symbol, fetch_ohlcv, COIN_LABELS, ai_client, exchange, news_context)
-        log.info("DEBUG cmd_coin regime: " + str(r.get("regime")))
 
-        # Clean up if we added it temporarily
-        if not original_label:
+        if not original_label and symbol in COIN_LABELS:
             del COIN_LABELS[symbol]
 
+        if not r or "direction" not in r:
+            await update.message.reply_text("Could not analyze " + coin + ". Try again.")
+            return
+
+        log.info("DEBUG cmd_coin regime: " + str(r.get("regime")))
+        
         sl, tp1, tp2 = calc_levels(r["direction"], r["price"], r["atr"])
         ob_bias, ob_ratio = get_order_book_bias(symbol)
         pos_usdt, contracts = calc_position_size(r["price"], sl)
