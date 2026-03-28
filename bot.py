@@ -905,7 +905,10 @@ async def cmd_coin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         header += "1H Score: `" + str(r["score_4h"]) + "` | 4H Score: `" + str(r["score_1d"]) + "`\n"
         header += "RSI 1H: `" + str(round(r["rsi_4h"],1)) + "` | RSI 4H: `" + str(round(r["rsi_1d"],1)) + "`\n"
         header += "TF Agreement: " + ("\u2705 Yes" if r["tf_agree"] else "\u26a0 No") + "\n\n"
-        header += " | Regime: `" + r.get("regime", {}).get("regime", "?") + "`\n\n"
+        regime_data = r.get("regime") if isinstance(r.get("regime"), dict) else {}
+        regime_name = regime_data.get("regime", "UNKNOWN")
+        adx_val = round(float(regime_data.get("adx", 0)), 1)
+        header += " Regime: `" + regime_name + "` | ADX: `" + str(adx_val) + "`\n\n"
         
         await update.message.reply_text(header + msg, parse_mode="Markdown")
     except Exception as e:
