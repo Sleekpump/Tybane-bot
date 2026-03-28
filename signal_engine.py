@@ -619,7 +619,7 @@ def compute_signal_quality(
             result["direction"] = "NEUTRAL"
             return result
         if funding_rate <= 0:
-            result["reject_reason"] f"SHORT blocked — funding rate {funding_rate:.4f} not positive"
+            result["reject_reason"] = f"SHORT blocked — funding rate {funding_rate:.4f} not positive"
             result["direction"] = "NEUTRAL"
             return result
 
