@@ -69,11 +69,6 @@ last_signal         = {}
 active_signals      = {}
 reentry_cooldown    = {}  # {symbol: timestamp} — prevents re-entry spam
 watched_trades      = {}  # {symbol: {direction, entry, start_time, last_alert}} — /watch command
-# Restore watches that survived a bot restart
-_saved_watches = load_json("watched_trades.json", {})
-if _saved_watches:
-    watched_trades.update(_saved_watches)
-    log.info(f"Restored {len(_saved_watches)} watched trade(s) from disk")
 btc_circuit_breaker = {   # BTC dump protection — blocks new LONGs when BTC is dumping
     "active":      False,
     "triggered_at": 0,
