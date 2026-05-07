@@ -53,9 +53,6 @@ except ImportError:
     log.warning("google-generativeai not installed — Gemini disabled. Run: pip install google-generativeai --break-system-packages")
 GEMINI_ENABLED = bool(GEMINI_API_KEY) and _GEMINI_IMPORT_OK
 
-# Load persisted Gemini quota state on startup
-_gemini_load_state()
-
 # ─── GEMINI RATE LIMITER ──────────────────────────────────────────────────────
 # Free tier limits: 15 RPM, 1500 RPD, 1M TPM.
 # Without this, every Groq overflow (up to 34 coins/cycle) hits Gemini at once
@@ -103,6 +100,9 @@ def _gemini_save_state():
             }, _f)
     except Exception:
         pass
+
+# Load persisted Gemini quota state on startup
+_gemini_load_state()
 
 def _gemini_rate_ok() -> bool:
     """Returns True if a Gemini call is allowed right now."""
