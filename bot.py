@@ -1607,15 +1607,15 @@ async def cmd_refine(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if symbol is None:
         symbol = f"{raw_symbol}/USDT:USDT"
 
-    await update.message.reply_text("🔍 Analysing entry for " + raw_symbol + " " + direction + " @ $" + str(entry_price) + "...")
-
-    # ── Cooldown — prevent spam (10s between calls per user) ─────────────────
+    # ── Cooldown BEFORE analysing — stop spam before any work is done ────────
     _uid = update.effective_user.id if update.effective_user else 0
     _now_r = time.time()
     if _now_r - _refine_last_call.get(_uid, 0) < 10:
         await update.message.reply_text("⏳ Please wait a moment before running /refine again.")
         return
     _refine_last_call[_uid] = _now_r
+
+    await update.message.reply_text("🔍 Analysing entry for " + raw_symbol + " " + direction + " @ $" + str(entry_price) + "...")
 
     try:
         import pandas_ta as _pta
@@ -1859,83 +1859,12 @@ async def cmd_refine(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
-        # ── TP1 / TP2 — ATR multiplier depends on trade type ─────────────
-        # Scalp: tight targets (1.2x / 2.2x ATR from 1H)
-        # Swing: wider targets (2.5x / 4.5x ATR from 4H)
-        tp1_price = tp2_price = None
-        tp1_pct_r = tp2_pct_r = None
-        try:
-            if trade_type == "scalp":
-                _atr_tp = float(ta.atr(df_1h["high"], df_1h["low"],
-                                       df_1h["close"], length=14).dropna().iloc[-1])
-                _m1, _m2 = 1.2, 2.2
-                _df_tp   = df_1h
-            else:
-                _atr_tp = float(ta.atr(df_4h["high"], df_4h["low"],
-                                       df_4h["close"], length=14).dropna().iloc[-1])
-                _m1, _m2 = 2.5, 4.5
-                _df_tp   = df_4h
-
-            # Use _pullback_entry (OB top) when gap forced WAIT — not the stale entry_price
-            _calc_from = _pullback_entry
-            if direction == "LONG":
-                tp1_price = round(_calc_from + _atr_tp * _m1, 6)
-                tp2_price = round(_calc_from + _atr_tp * _m2, 6)
-            else:
-                tp1_price = round(_calc_from - _atr_tp * _m1, 6)
-                tp2_price = round(_calc_from - _atr_tp * _m2, 6)
-
-            tp1_pct_r = round(abs(tp1_price - _calc_from) / _calc_from * 100, 1)
-            tp2_pct_r = round(abs(tp2_price - _calc_from) / _calc_from * 100, 1)
-        except Exception as _tp_e:
-            log.warning(f"Refine TP calc error: {_tp_e}")
-
         # ── Format message ────────────────────────────────────────────────
         def _c(s):
             return str(s).replace("*","").replace("`","").replace("_"," ").replace("[","").replace("]","").replace("✦","").replace("—","-")
 
-        action      = entry_check["action"]
-        action_icon = {"ENTER": "✅", "WAIT": "⏳",
-                       "CONDITIONAL": "🟡", "NEUTRAL": "⚪"}.get(action, "⚪")
-
-        # ── Force WAIT when gap is too large ─────────────────────────────────
-        # When price moved 10%+ above LONG entry (or below SHORT), original
-        # entry is stale. Override to WAIT and use OB top as pullback target.
-        # Previously this contradicted itself: gap warning said "wait" but
-        # verdict said ENTER with stale entry price — levels were all wrong.
-        _pullback_entry = entry_price  # default: use original entry for level calc
-        if force_wait_gap:
-            action      = "WAIT"
-            action_icon = "⏳"
-            # Use OB top as the pullback entry — that's where buyers previously
-            # stepped in. If no OB, fall back to current price for level calc.
-            if _ob_ref and direction == "LONG":
-                _pullback_entry = _ob_ref["high"]
-                entry_check["pullback_target"] = round(_ob_ref["high"], 6)
-                entry_check["reason"] = (
-                    f"Price ran +{abs_gap:.1f}% — wait for pullback to demand OB "
-                    f"${_ob_ref['low']:.4f}–${_ob_ref['high']:.4f}"
-                )
-            elif _ob_ref and direction == "SHORT":
-                _pullback_entry = _ob_ref["low"]
-                entry_check["pullback_target"] = round(_ob_ref["low"], 6)
-                entry_check["reason"] = (
-                    f"Price dropped -{abs_gap:.1f}% — wait for bounce to supply OB "
-                    f"${_ob_ref['low']:.4f}–${_ob_ref['high']:.4f}"
-                )
-            else:
-                _pullback_entry = price_now   # no OB — use current price at least
-                entry_check["reason"] = (
-                    f"Price moved {abs_gap:.1f}% from entry — no demand OB found, "
-                    f"use chart structure to find pullback zone"
-                )
-            entry_check["action"] = "ENTER"
-            action      = "ENTER"
-            action_icon = "✅"
-            entry_check["reason"] = trend_strength_note
-
-        # ── OB reference level — shown even on ENTER so you know the zone ────
-        _ob_ref = None
+        # ── OB reference — MUST be defined before _pullback_entry uses it ────
+        _ob_ref   = None
         _ob_label = ""
         try:
             if _ob_r:
@@ -1947,6 +1876,65 @@ async def cmd_refine(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
                     _ob_label = "Supply OB"
         except Exception:
             pass
+
+        # ── _pullback_entry — MUST be defined before TP calc uses it ─────────
+        # Default: use original entry price. Override when gap forced WAIT.
+        _pullback_entry = entry_price
+
+        # ── Force WAIT when price moved 10%+ from stale entry ────────────────
+        if force_wait_gap:
+            action      = "WAIT"
+            action_icon = "⏳"
+            if _ob_ref and direction == "LONG":
+                _pullback_entry = _ob_ref["high"]
+                entry_check["pullback_target"] = round(_ob_ref["high"], 6)
+                entry_check["reason"] = (
+                    f"Price ran +{abs_gap:.1f}% - wait for pullback to demand OB "
+                    f"${_ob_ref['low']:.4f}-${_ob_ref['high']:.4f}"
+                )
+            elif _ob_ref and direction == "SHORT":
+                _pullback_entry = _ob_ref["low"]
+                entry_check["pullback_target"] = round(_ob_ref["low"], 6)
+                entry_check["reason"] = (
+                    f"Price dropped -{abs_gap:.1f}% - wait for bounce to supply OB "
+                    f"${_ob_ref['low']:.4f}-${_ob_ref['high']:.4f}"
+                )
+            else:
+                _pullback_entry = price_now
+                entry_check["reason"] = (
+                    f"Price moved {abs_gap:.1f}% from entry - no structural OB found, "
+                    f"use chart to identify pullback zone"
+                )
+        else:
+            # Normal path — action already set by entry_check
+            action      = entry_check["action"]
+            action_icon = {"ENTER": "✅", "WAIT": "⏳",
+                           "CONDITIONAL": "🟡", "NEUTRAL": "⚪"}.get(action, "⚪")
+
+        # ── TP1 / TP2 — now defined AFTER _pullback_entry is resolved ────────
+        # Scalp: 1.2x / 2.2x 1H ATR  |  Swing: 2.5x / 4.5x 4H ATR
+        tp1_price = tp2_price = None
+        tp1_pct_r = tp2_pct_r = None
+        try:
+            if trade_type == "scalp":
+                _atr_tp = float(ta.atr(df_1h["high"], df_1h["low"],
+                                       df_1h["close"], length=14).dropna().iloc[-1])
+                _m1, _m2 = 1.2, 2.2
+            else:
+                _atr_tp = float(ta.atr(df_4h["high"], df_4h["low"],
+                                       df_4h["close"], length=14).dropna().iloc[-1])
+                _m1, _m2 = 2.5, 4.5
+            _calc_from = _pullback_entry   # correctly resolved by this point
+            if direction == "LONG":
+                tp1_price = round(_calc_from + _atr_tp * _m1, 6)
+                tp2_price = round(_calc_from + _atr_tp * _m2, 6)
+            else:
+                tp1_price = round(_calc_from - _atr_tp * _m1, 6)
+                tp2_price = round(_calc_from - _atr_tp * _m2, 6)
+            tp1_pct_r = round(abs(tp1_price - _calc_from) / _calc_from * 100, 1)
+            tp2_pct_r = round(abs(tp2_price - _calc_from) / _calc_from * 100, 1)
+        except Exception as _tp_e:
+            log.warning(f"Refine TP calc error: {_tp_e}")
 
         # ── Opposing direction check ──────────────────────────────────────────
         # Run grade on the other side so user knows which direction is cleaner
